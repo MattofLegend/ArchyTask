@@ -1,0 +1,140 @@
+{
+  "name": "archy-task",
+  "displayName": "ArchyTask",
+  "description": "Clean and Minimal Markdown ToDo List",
+  "version": "0.9.0",
+  "publisher": "SunnyWardGames",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/swgamesdev/ArchyTask"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "icon": "images/archytask_icon.png",
+  "activationEvents": [
+    "onView:archyTaskView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "archyTask-sidebar",
+          "title": "ArchyTask",
+          "icon": "$(list-unordered)"
+        }
+      ]
+    },
+    "views": {
+      "archyTask-sidebar": [
+        {
+          "type": "webview",
+          "id": "archyTaskView",
+          "name": "ArchyTask",
+          "icon": "$(list-unordered)",
+          "contextualTitle": "ArchyTask"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "archyTask.syncFile",
+        "title": "Reload Tasks from md File"
+      },
+      {
+        "command": "archyTask.showKeyboardShortcuts",
+        "title": "Show Keyboard Shortcuts"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "archyTask.moreActionsSubmenu",
+        "label": "More Actions",
+        "icon": "$(ellipsis)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "submenu": "archyTask.moreActionsSubmenu",
+          "when": "view == archyTaskView",
+          "group": "navigation"
+        }
+      ],
+      "archyTask.moreActionsSubmenu": [
+        {
+          "command": "archyTask.syncFile"
+        },
+        {
+          "command": "archyTask.showKeyboardShortcuts"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "ArchyTask",
+      "properties": {
+        "archyTask.filePath": {
+          "type": "string",
+          "default": "archytask.md",
+          "description": "Path to the archytask.md file (relative to workspace root or absolute path)",
+          "scope": "resource"
+        },
+        "archyTask.taskMoveModifier": {
+          "type": "string",
+          "enum": [
+            "ctrl",
+            "alt"
+          ],
+          "enumDescriptions": [
+            "Use ctrl key on Windows / cmd key on Mac",
+            "Use alt key on Windows / option key on Mac"
+          ],
+          "default": "ctrl",
+          "description": "Keyboard modifier for task movement operations (ctrl+Arrow or alt+Arrow)",
+          "scope": "window"
+        },
+        "archyTask.newItemTrigger": {
+          "type": "string",
+          "enum": [
+            "shift+enter",
+            "enter"
+          ],
+          "enumDescriptions": [
+            "Shift+Enter creates new item (Enter enters edit mode)",
+            "Enter key creates new item (Shift+Enter enters edit mode)"
+          ],
+          "default": "shift+enter",
+          "description": "Keyboard shortcut to create new item",
+          "scope": "window"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "node media/main.test.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.9",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.95.0",
+    "@typescript-eslint/eslint-plugin": "^8.10.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.13.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.43"
+  }
+}

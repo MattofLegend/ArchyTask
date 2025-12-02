@@ -1,0 +1,92 @@
+body {
+    font-family: var(--vscode-font-family);
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-editor-background);
+    padding: 20px;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+h1 {
+    margin-bottom: 30px;
+    font-size: 2em;
+    font-weight: 300;
+    text-align: center;
+    color: var(--vscode-editor-foreground);
+    letter-spacing: 1px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    border-bottom: 2px solid var(--vscode-widget-border);
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--vscode-foreground);
+    opacity: 0.9;
+}
+
+td {
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--vscode-widget-border);
+    vertical-align: middle;
+}
+
+.category-row td {
+    font-weight: 600;
+    font-size: 1.1em;
+    padding-top: 30px;
+    padding-bottom: 10px;
+    color: var(--vscode-textLink-activeForeground);
+    border-bottom: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.action-col {
+    width: 40%;
+    font-size: 1.05em;
+}
+
+.keys-col {
+    width: 30%;
+    line-height: 2;
+}
+
+.key {
+    display: inline-block;
+    min-width: 12px;
+    text-align: center;
+    padding: 2px 4px;
+    border: 1px solid var(--vscode-widget-border);
+    border-radius: 5px;
+    background-color: var(--vscode-keybindingLabel-background);
+    color: var(--vscode-keybindingLabel-foreground);
+    border-bottom-color: var(--vscode-keybindingLabel-bottomBorder);
+    box-shadow: inset 0 -1px 0 var(--vscode-keybindingLabel-bottomBorder);
+    font-family: var(--vscode-editor-font-family), monospace;
+    font-size: 0.9em;
+    line-height: 1.2;
+}
+
+.separator {
+    margin: 0 8px;
+    color: var(--vscode-descriptionForeground);
+    font-weight: bold;
+    opacity: 0.7;
+}
+
+/* Hover effect for rows */
+tr:not(.category-row):hover td {
+    background-color: var(--vscode-list-hoverBackground);
+}

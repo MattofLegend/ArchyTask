@@ -1,0 +1,610 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: var(--vscode-font-family);
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+    --row-height: 24px; /* Fixed height for items */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* ... (skip to .item-content) ... */
+
+.item-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-right: 10px;
+    height: var(--row-height); /* Enforce fixed height */
+}
+
+/* ... (skip to .edit-input) ... */
+
+.edit-input {
+    font-family: inherit;
+    font-size: inherit;
+    border: 1px solid var(--vscode-input-border);
+    background-color: transparent;
+    color: inherit;
+    padding: 0 4px;
+    margin: 0 0 0 5px;
+    outline: none;
+    border-radius: 2px;
+    height: 100%; /* Fill the fixed height */
+    box-sizing: border-box; /* Include border in height */
+}
+
+.edit-input {
+    font-family: inherit;
+    font-size: inherit;
+    border: 1px solid var(--vscode-input-border);
+    background-color: transparent;
+    color: inherit;
+    padding: 0 4px;
+    margin: 0 0 0 5px;
+    outline: none;
+    border-radius: 2px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.edit-input:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.header-left, .header-right {
+    display: flex;
+    gap: 5px;
+}
+
+button {
+    background: none;
+    border: none;
+    color: var(--vscode-icon-foreground);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 3px;
+    position: relative; /* For tooltip positioning */
+}
+
+button:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+/* Custom Tooltip */
+[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 100%;
+    margin-top: 4px;
+    background-color: var(--vscode-editorHoverWidget-background);
+    color: var(--vscode-editorHoverWidget-foreground);
+    border: 1px solid var(--vscode-editorHoverWidget-border);
+    padding: 3px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    opacity: 0;
+    animation: tooltip-appear 0s linear 0.1s forwards; /* 0.1s delay, then instant */
+}
+
+.header-left [data-tooltip]:hover::after {
+    left: 0;
+}
+
+.header-right [data-tooltip]:hover::after {
+    right: 0;
+}
+
+@keyframes tooltip-appear {
+    to { opacity: 1; }
+}
+
+/* List */
+#item-list {
+    padding: 10px 0 0 10px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* Inspector */
+/* Inspector */
+.inspector {
+    height: 240px;
+    border-top: 1px solid var(--vscode-panel-border);
+    background-color: var(--vscode-sideBarSectionHeader-background);
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    box-sizing: border-box;
+    transition: height 0.2s ease;
+    overflow: hidden;
+}
+
+.inspector.collapsed {
+    height: 32px;
+}
+
+.inspector-header {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--vscode-descriptionForeground);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+}
+
+.inspector-header:hover {
+    color: var(--vscode-foreground);
+}
+
+#inspector-toggle-icon {
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+.inspector-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.inspector textarea {
+    flex-grow: 1;
+    width: 100%;
+    resize: none;
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border: 1px solid var(--vscode-input-border);
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    padding: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.inspector textarea:focus {
+    border-color: var(--vscode-focusBorder);
+}
+
+.inspector-note-display {
+    flex-grow: 1;
+    width: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+    background-color: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 2px;
+    color: var(--vscode-input-foreground);
+    font-family: var(--vscode-font-family);
+    font-size: var(--vscode-font-size);
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    cursor: text;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.inspector-note-display:hover {
+    background-color: color-mix(in srgb, var(--vscode-input-background) 90%, var(--vscode-foreground) 10%);
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+    cursor: pointer;
+    border: 1px solid transparent; /* For selection border */
+    transition: opacity 0.4s, transform 0.4s cubic-bezier(0.19, 1, 0.22, 1); /* easeOutExpo */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.item.moving {
+    opacity: 0.4;
+    transition: none;
+}
+
+.item.moving.offset-up {
+    transform: translateY(4px);
+}
+
+.item.moving.offset-down {
+    transform: translateY(-4px);
+}
+
+.item.selected {
+    background-color: color-mix(in srgb, var(--vscode-textLink-foreground) 50%, transparent);
+    border-radius: 4px;
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+/* Pre-selection state: outline only */
+.item.pre-selected {
+    background-color: transparent;
+    border: 1px solid color-mix(in srgb, var(--vscode-textLink-foreground) 50%, transparent);
+    border-radius: 4px;
+}
+
+/* Contiguous Selection Styling */
+/* If next is selected, remove bottom radius */
+.item.selected:has(+ .item.selected) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* If prev is selected, remove top radius */
+.item.selected + .item.selected {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Contiguous Pre-Selection Styling */
+.item.pre-selected:has(+ .item.pre-selected) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-color: transparent; /* Transparent bottom border for non-last items */
+}
+
+.item.pre-selected + .item.pre-selected {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top-color: transparent; /* Transparent top border for non-first items */
+}
+
+/* Last pre-selected item in contiguous group (has previous pre-selected) */
+.item.pre-selected + .item.pre-selected:not(:has(+ .item.pre-selected)) {
+    border-top-color: transparent; /* Transparent top border for last item when not alone */
+}
+
+.item-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-right: 10px;
+    height: var(--row-height);
+}
+
+.item-title {
+    margin-left: 5px;
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    outline: none;
+}
+
+.item.checked .item-title {
+    color: var(--vscode-disabledForeground);
+}
+
+/* Item Types */
+.item-heading {
+    border-bottom: 2px solid var(--vscode-panel-border);
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+.item-heading .item-content {
+    font-weight: bold;
+    width: 100%;
+    color: var(--vscode-textLink-foreground);
+}
+
+.item-archive {
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+.item-archive .item-content {
+    color: var(--vscode-disabledForeground) !important;
+}
+
+.item-archive.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.item-archive.selected .item-content {
+    color: var(--vscode-list-activeSelectionForeground) !important;
+}
+
+.item-archive.archive-open .item-content {
+    color: var(--vscode-textLink-foreground) !important;
+}
+
+.archive-icon {
+    margin-right: 0px;
+    padding: 2px 2px;
+    display: flex;
+    align-items: center;
+    color: inherit;
+    pointer-events: none; /* Let click pass through to item */
+}
+
+.archive-icon.active {
+    color: var(--vscode-textLink-foreground);
+}
+
+.archive-clear-btn {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--vscode-icon-foreground);
+    cursor: pointer;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+
+.archive-clear-btn:hover {
+    opacity: 1;
+    background-color: var(--vscode-toolbar-hoverBackground);
+    border-radius: 2px;
+}
+
+/* Archived items */
+.archived-item {
+    opacity: 0.7;
+}
+
+.archived-item .item-checkbox {
+    opacity: 0.5;
+}
+
+.archived-item.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+    opacity: 1;
+}
+
+.archived-item .item-title {
+    text-decoration: line-through;
+    color: var(--vscode-disabledForeground);
+}
+
+.archived-item.selected .item-title {
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+
+
+.item-todo input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid var(--vscode-checkbox-border);
+    background-color: var(--vscode-checkbox-background);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    margin: 0 5px 0 0;
+    flex-shrink: 0;
+    outline: none;
+}
+
+.item-todo input[type="checkbox"]:checked {
+    background-color: var(--vscode-textLink-foreground);
+    border-color: var(--vscode-textLink-foreground);
+}
+
+.item-todo input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 3px;
+    height: 8px;
+    border: solid var(--vscode-editor-background);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Bold title for parent todos */
+.item-todo .item-title {
+    font-weight: normal;
+}
+
+/* Normal weight for child todos */
+.item-todo.indent-1 .item-title {
+    font-weight: normal;
+    /* font-style: italic; */
+    font-size: calc(var(--vscode-font-size) - 1px);
+}
+
+
+
+/* Indentation is handled by padding-left in JS or inline style */
+
+/* Tree Lines for Child Tasks */
+.item.indent-1 .item-content {
+    position: relative;
+}
+
+/* Vertical Line */
+.item.indent-1 .item-content::before {
+    content: '';
+    position: absolute;
+    left: -13px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--vscode-checkbox-border);
+}
+
+/* Horizontal Line */
+.item.indent-1 .item-content::after {
+    content: '';
+    position: absolute;
+    left: -13px;
+    top: 50%;
+    width: 8px;
+    height: 1px;
+    background-color: var(--vscode-checkbox-border);
+}
+
+/* Last Child Logic: Turn ├ into └ */
+/* If the next item is NOT indent-1, this is the last child of the group */
+.item.indent-1:not(:has(+ .item.indent-1)) .item-content::before {
+    height: 50%;
+    bottom: auto;
+}
+
+.item-note-icon {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+/* Notification Area */
+.notification-area {
+    position: fixed;
+    top: 50px; /* Below header */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+    pointer-events: none; /* Let clicks pass through */
+}
+
+.notification-toast {
+    background-color: var(--vscode-notifications-background);
+    color: var(--vscode-notifications-foreground);
+    border: 1px solid var(--vscode-notifications-border);
+    padding: 8px 16px;
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: toast-in-out 1.5s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-toast .codicon {
+    font-size: 16px;
+}
+
+@keyframes toast-in-out {
+    0% { opacity: 0; transform: translateY(-10px); }
+    15% { opacity: 1; transform: translateY(0); }
+    85% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Donation Banner */
+.donation-banner {
+    background: linear-gradient(135deg, rgba(100, 200, 255, 0.1) 0%, rgba(150, 100, 255, 0.1) 100%);
+    color: var(--vscode-editor-foreground);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid rgba(100, 150, 255, 0.3);
+    border-radius: 4px;
+    margin: 8px 12px;
+    backdrop-filter: blur(10px);
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.donation-text {
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.donation-text::before {
+    content: "✨";
+    font-size: 16px;
+}
+
+.donation-buttons {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.donation-buttons button {
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.donation-buttons #btn-donate {
+    background: linear-gradient(135deg, #FF6B6B 0%, #FF8E72 100%);
+    color: #FFFFFF;
+    flex: 1;
+    min-width: 120px;
+}
+
+.donation-buttons #btn-donate:hover {
+    background: linear-gradient(135deg, #FF5252 0%, #FF7A5C 100%);
+}
+
+.donation-buttons #btn-dismiss {
+    background-color: rgba(128, 128, 128, 0.2);
+    color: var(--vscode-editor-foreground);
+    min-width: 80px;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+.donation-buttons #btn-dismiss:hover {
+    background-color: rgba(128, 128, 128, 0.3);
+    border-color: rgba(128, 128, 128, 0.5);
+}

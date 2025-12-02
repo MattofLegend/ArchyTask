@@ -1,0 +1,43 @@
+/* Donation Banner */
+.donation-banner {
+    background-color: var(--vscode-editor-selectionBackground);
+    color: var(--vscode-editor-foreground);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--vscode-widget-border);
+}
+
+.donation-text {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.donation-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.donation-buttons button {
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.donation-buttons button:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+.donation-buttons #btn-dismiss {
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+}
+
+.donation-buttons #btn-dismiss:hover {
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
