@@ -2,3 +2,10 @@ out
 node_modules
 .vscode-test
 *.vsix
+
+# Local tool configs
+.codacy/
+.vscode/
+
+# Cursor AI rules
+.cursor/
