@@ -35,6 +35,8 @@ let isUndoingRedoing = false;
 let isArchiveHidden = true;
 let isPreSelected = false; // Pre-selection state: cursor is shown but inspector is hidden
 let clipboard = []; // Clipboard for copy/paste operations
+let dragState = { dragging: false, draggedIndex: -1, draggedIndices: [], dropTargetIndex: -1, dropPosition: null, dropIndent: 0, startX: 0 };
+let dragIndicator = null;
 let isArchiveActive = false; // Whether archive section is active (for keyboard navigation)
 let isArchiveHeaderSelected = false; // Whether the archive header is selected
 
@@ -2877,6 +2879,34 @@ function stopEditing(save) {
     }
 }
 
+function clearAllDragIndicators() {
+    if (dragIndicator && dragIndicator.parentNode) {
+        dragIndicator.parentNode.removeChild(dragIndicator);
+    }
+    dragIndicator = null;
+}
+
+function showDragIndicator(targetElement, position, indent) {
+    if (!dragIndicator) {
+        dragIndicator = document.createElement('div');
+        dragIndicator.className = 'drag-indicator';
+    }
+    
+    const rect = targetElement.getBoundingClientRect();
+    const listContainer = document.getElementById('item-list');
+    const containerRect = listContainer.getBoundingClientRect();
+    
+    const indentPadding = 10 + (indent * 20);
+    
+    dragIndicator.style.left = indentPadding + 'px';
+    dragIndicator.style.top = (position === 'top' ? rect.top : rect.bottom) - containerRect.top + listContainer.scrollTop + 'px';
+    
+    if (!dragIndicator.parentNode) {
+        listContainer.style.position = 'relative';
+        listContainer.appendChild(dragIndicator);
+    }
+}
+
 function render(notify = true) {
     const listContainer = document.getElementById('item-list');
     listContainer.innerHTML = '';
@@ -2893,6 +2923,144 @@ function render(notify = true) {
     items.forEach((item, index) => {
         // Create base item div
         const itemDiv = RenderUtils.createItemDiv(item, index);
+        
+        // Make item draggable
+        itemDiv.draggable = true;
+        
+        itemDiv.ondragstart = (e) => {
+            if (editingId) {
+                e.preventDefault();
+                return;
+            }
+            dragState.dragging = true;
+            dragState.draggedIndex = index;
+            dragState.startX = e.clientX;
+            
+            dragState.draggedIndices = [index];
+            if (item.indent === 0 && item.type !== 'heading') {
+                for (let i = index + 1; i < items.length; i++) {
+                    if (items[i].indent === 1) {
+                        dragState.draggedIndices.push(i);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            dragState.draggedIndices.forEach(idx => {
+                const el = document.querySelector(`.item[data-index="${idx}"]`);
+                if (el) el.classList.add('dragging');
+            });
+            
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', index.toString());
+        };
+        
+        itemDiv.ondragend = () => {
+            dragState.draggedIndices.forEach(idx => {
+                const el = document.querySelector(`.item[data-index="${idx}"]`);
+                if (el) el.classList.remove('dragging');
+            });
+            clearAllDragIndicators();
+            dragState.dragging = false;
+            dragState.draggedIndex = -1;
+            dragState.draggedIndices = [];
+            dragState.dropTargetIndex = -1;
+            dragState.dropPosition = null;
+            dragState.dropIndent = 0;
+            dragState.startX = 0;
+        };
+        
+        itemDiv.ondragover = (e) => {
+            if (!dragState.dragging || dragState.draggedIndices.includes(index)) {
+                return;
+            }
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            
+            const rect = itemDiv.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            const position = e.clientY < midY ? 'top' : 'bottom';
+            
+            const deltaX = e.clientX - dragState.startX;
+            
+            let newIndent = 0;
+            if (deltaX > 30) {
+                newIndent = 1;
+            }
+            
+            if (newIndent === 1) {
+                const checkIndex = position === 'top' ? index - 1 : index;
+                if (checkIndex < 0 || (checkIndex >= 0 && items[checkIndex]?.type === 'heading')) {
+                    newIndent = 0;
+                }
+            }
+            
+            const draggedItem = items[dragState.draggedIndex];
+            if (draggedItem?.type === 'heading') {
+                newIndent = 0;
+            }
+            
+            if (dragState.draggedIndices.length > 1 && draggedItem?.indent === 0) {
+                newIndent = 0;
+            }
+            
+            dragState.dropTargetIndex = index;
+            dragState.dropPosition = position;
+            dragState.dropIndent = newIndent;
+            
+            showDragIndicator(itemDiv, position, newIndent);
+        };
+        
+        itemDiv.ondragleave = (e) => {
+        };
+        
+        itemDiv.ondrop = (e) => {
+            e.preventDefault();
+            if (!dragState.dragging || dragState.draggedIndices.includes(index)) {
+                clearAllDragIndicators();
+                return;
+            }
+            
+            const draggedIndices = [...dragState.draggedIndices];
+            let toIndex = index;
+            
+            if (dragState.dropPosition === 'bottom') {
+                toIndex = index + 1;
+            }
+            
+            const itemsBeforeTarget = draggedIndices.filter(i => i < toIndex).length;
+            const adjustedToIndex = toIndex - itemsBeforeTarget;
+            
+            if (adjustedToIndex >= 0 && adjustedToIndex <= items.length) {
+                saveState();
+                
+                const movedItems = draggedIndices.map(i => items[i]);
+                
+                for (let i = draggedIndices.length - 1; i >= 0; i--) {
+                    items.splice(draggedIndices[i], 1);
+                }
+                
+                const indentDelta = dragState.dropIndent - movedItems[0].indent;
+                movedItems.forEach(movedItem => {
+                    movedItem.indent = Math.max(0, Math.min(1, movedItem.indent + indentDelta));
+                });
+                
+                items.splice(adjustedToIndex, 0, ...movedItems);
+                
+                activeIndex = adjustedToIndex;
+                selectedIndices.clear();
+                for (let i = 0; i < movedItems.length; i++) {
+                    selectedIndices.add(adjustedToIndex + i);
+                }
+                anchorIndex = adjustedToIndex;
+                
+                render();
+            }
+            
+            clearAllDragIndicators();
+        };
+        
         const contentDiv = document.createElement('div');
         contentDiv.className = 'item-content';
 

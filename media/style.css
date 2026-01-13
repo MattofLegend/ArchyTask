@@ -251,6 +251,7 @@ button:hover {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    position: relative;
 }
 
 .item.moving {
@@ -264,6 +265,33 @@ button:hover {
 
 .item.moving.offset-down {
     transform: translateY(-4px);
+}
+
+/* Drag and Drop */
+.item.dragging {
+    opacity: 0.4;
+    background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.drag-indicator {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--vscode-focusBorder);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.drag-indicator::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--vscode-focusBorder);
 }
 
 .item.selected {
