@@ -47,6 +47,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
                     </div>
                 </div>
 				<div id="item-list"></div>
+                <div id="inspector-resize-handle" class="inspector-resize-handle"></div>
                 <div id="inspector" class="inspector">
                     <div class="inspector-header" id="inspector-header">
                         <i id="inspector-toggle-icon" class="codicon codicon-chevron-right"></i>

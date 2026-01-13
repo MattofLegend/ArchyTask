@@ -123,9 +123,39 @@ button:hover {
     overflow-y: auto;
 }
 
-/* Inspector */
+/* Inspector Resize Handle */
+.inspector-resize-handle {
+    height: 6px;
+    background-color: transparent;
+    cursor: ns-resize;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
+}
+
+.inspector-resize-handle::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    background-color: var(--vscode-panel-border);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.inspector-resize-handle:hover::before,
+.inspector-resize-handle.dragging::before {
+    opacity: 1;
+    background-color: var(--vscode-focusBorder);
+}
+
 /* Inspector */
 .inspector {
+    min-height: 80px;
     height: 240px;
     border-top: 1px solid var(--vscode-panel-border);
     background-color: var(--vscode-sideBarSectionHeader-background);
@@ -133,8 +163,8 @@ button:hover {
     flex-direction: column;
     padding: 5px;
     box-sizing: border-box;
-    transition: height 0.2s ease;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .inspector.collapsed {
@@ -209,9 +239,6 @@ button:hover {
     -ms-user-select: none;
 }
 
-.inspector-note-display:hover {
-    background-color: color-mix(in srgb, var(--vscode-input-background) 90%, var(--vscode-foreground) 10%);
-}
 
 .item {
     display: flex;

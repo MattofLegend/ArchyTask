@@ -3283,16 +3283,19 @@ const inspector = document.getElementById('inspector');
 let isInspectorCollapsed = false; // Default to expanded
 
 function updateInspectorState() {
+    const resizeHandle = document.getElementById('inspector-resize-handle');
     if (isInspectorCollapsed) {
         inspector.classList.add('collapsed');
         inspectorContent.style.display = 'none';
         inspectorIcon.classList.remove('codicon-chevron-down');
         inspectorIcon.classList.add('codicon-chevron-right');
+        if (resizeHandle) resizeHandle.style.display = 'none';
     } else {
         inspector.classList.remove('collapsed');
         inspectorContent.style.display = 'flex';
         inspectorIcon.classList.remove('codicon-chevron-right');
         inspectorIcon.classList.add('codicon-chevron-down');
+        if (resizeHandle) resizeHandle.style.display = 'block';
     }
 }
 
@@ -3304,12 +3307,49 @@ inspectorHeader.addEventListener('click', () => {
     updateInspectorState();
 });
 
+// Inspector resize handle
+const inspectorResizeHandle = document.getElementById('inspector-resize-handle');
+let isResizing = false;
+let startY = 0;
+let startHeight = 0;
+
+inspectorResizeHandle.addEventListener('mousedown', (e) => {
+    if (isInspectorCollapsed) return;
+    
+    isResizing = true;
+    startY = e.clientY;
+    startHeight = inspector.offsetHeight;
+    inspectorResizeHandle.classList.add('dragging');
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+});
+
+document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    
+    const deltaY = startY - e.clientY;
+    const newHeight = Math.max(80, Math.min(window.innerHeight * 0.7, startHeight + deltaY));
+    inspector.style.height = newHeight + 'px';
+});
+
+document.addEventListener('mouseup', () => {
+    if (isResizing) {
+        isResizing = false;
+        inspectorResizeHandle.classList.remove('dragging');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+    }
+});
+
 function renderInspector() {
     const inspector = document.getElementById('inspector');
+    const resizeHandle = document.getElementById('inspector-resize-handle');
 
     // Hide inspector when archive items are selected
     if (isArchiveActive || isArchiveHeaderSelected) {
         inspector.style.display = 'none';
+        resizeHandle.style.display = 'none';
         if (isEditingNote) {
             stopEditingNote(true);
         }
@@ -3321,6 +3361,7 @@ function renderInspector() {
 
     if (activeIndex >= 0 && activeIndex < items.length) {
         inspector.style.display = 'flex';
+        resizeHandle.style.display = 'block';
         const item = items[activeIndex];
 
         // Update display and textarea
@@ -3338,6 +3379,7 @@ function renderInspector() {
         }
     } else {
         inspector.style.display = 'none';
+        resizeHandle.style.display = 'none';
         if (isEditingNote) {
             stopEditingNote(true);
         }
