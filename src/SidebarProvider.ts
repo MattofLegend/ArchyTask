@@ -17,6 +17,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 			<head>
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<style>
+					body { 
+						background-color: var(--vscode-editor-background); 
+						color: var(--vscode-foreground);
+						margin: 0;
+						padding: 0;
+					}
+				</style>
 				<link href="${styleUri}" rel="stylesheet">
                 <link href="${codiconsUri}" rel="stylesheet">
 				<title>ArchyTask</title>
@@ -70,7 +78,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 
 	public resolveWebviewView(
 		webviewView: vscode.WebviewView,
-		context: vscode.WebviewViewResolveContext,
+		_context: vscode.WebviewViewResolveContext,
 		_token: vscode.CancellationToken
 	) {
 		this._view = webviewView;

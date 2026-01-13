@@ -1,6 +1,32 @@
 const vscode = acquireVsCodeApi();
 
 // ============================================================
+// State Persistence
+// ============================================================
+const savedState = vscode.getState() || {};
+let inspectorHeight = savedState.inspectorHeight || null;
+let cachedItems = savedState.items || null;
+let cachedArchivedItems = savedState.archivedItems || null;
+let cachedActiveIndex = savedState.activeIndex ?? -1;
+let cachedScrollTop = savedState.scrollTop || 0;
+let cachedIsInspectorCollapsed = savedState.isInspectorCollapsed || false;
+
+function saveWebviewState() {
+    try {
+        const itemList = document.getElementById('item-list');
+        vscode.setState({
+            inspectorHeight: inspectorHeight,
+            items: items,
+            archivedItems: archivedItems,
+            activeIndex: activeIndex,
+            scrollTop: itemList ? itemList.scrollTop : 0,
+            isInspectorCollapsed: isInspectorCollapsed
+        });
+    } catch (error) {
+    }
+}
+
+// ============================================================
 // Constants
 // ============================================================
 const Constants = {
@@ -1696,9 +1722,22 @@ function redo() {
 window.addEventListener('message', event => {
     const message = event.data;
     switch (message.type) {
-        case 'update':
-            items = message.items || [];
-            archivedItems = message.archivedItems || [];
+        case 'update': {
+            const newItems = message.items || [];
+            const newArchivedItems = message.archivedItems || [];
+            
+            const itemsChanged = JSON.stringify(newItems) !== JSON.stringify(items);
+            const archivedChanged = JSON.stringify(newArchivedItems) !== JSON.stringify(archivedItems);
+            
+            items = newItems;
+            archivedItems = newArchivedItems;
+            
+            saveWebviewState();
+            
+            if (!itemsChanged && !archivedChanged && cachedItems) {
+                break;
+            }
+            
             // Validate activeIndex against new items
             if (activeIndex >= items.length) {
                 activeIndex = -1;
@@ -1711,12 +1750,10 @@ window.addEventListener('message', event => {
             archivedAnchorIndex = -1;
             isArchiveActive = false;
             isArchiveHeaderSelected = false;
-            // If we were editing, we might lose focus if we just re-render blindly,
-            // but for now let's assume update comes from file change or initial load.
-            // If we are driving the change locally, we might want to be careful.
-            // For this step, we'll re-render.
-            render(false); // Don't notify extension on inbound update
+            
+            render(false);
             break;
+        }
         case 'settings':
             taskMoveModifier = message.taskMoveModifier || 'ctrl';
             newItemTrigger = message.newItemTrigger || 'enter';
@@ -2917,6 +2954,7 @@ function render(notify = true) {
             items: items,
             archivedItems: archivedItems
         });
+        saveWebviewState();
     }
 
     // Render main items (no archive heading or items in this loop)
@@ -3507,6 +3545,8 @@ document.addEventListener('mouseup', () => {
         inspectorResizeHandle.classList.remove('dragging');
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+        inspectorHeight = inspector.offsetHeight;
+        saveWebviewState();
     }
 });
 
@@ -3530,6 +3570,9 @@ function renderInspector() {
     if (activeIndex >= 0 && activeIndex < items.length) {
         inspector.style.display = 'flex';
         resizeHandle.style.display = 'block';
+        if (inspectorHeight && !isInspectorCollapsed) {
+            inspector.style.height = inspectorHeight + 'px';
+        }
         const item = items[activeIndex];
 
         // Update display and textarea
@@ -3570,6 +3613,23 @@ window.addEventListener('focus', () => {
 document.addEventListener('contextmenu', (event) => {
     event.preventDefault();
 });
+
+// Restore cached state immediately to prevent visible reload
+if (cachedItems && cachedItems.length > 0) {
+    items = cachedItems;
+    archivedItems = cachedArchivedItems || [];
+    activeIndex = cachedActiveIndex;
+    isInspectorCollapsed = cachedIsInspectorCollapsed;
+    
+    render(false);
+    
+    requestAnimationFrame(() => {
+        const itemList = document.getElementById('item-list');
+        if (itemList && cachedScrollTop) {
+            itemList.scrollTop = cachedScrollTop;
+        }
+    });
+}
 
 // Signal that we are ready
 vscode.postMessage({ type: 'ready' });

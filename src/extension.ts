@@ -3,16 +3,21 @@ import { SidebarProvider } from './SidebarProvider';
 import { ShortcutsPanel } from './ShortcutsPanel';
 
 export function activate(context: vscode.ExtensionContext) {
-	console.log('Congratulations, your extension "archy-task" is now active!');
+	console.log('ArchyTask extension is now active!');
 
 	const sidebarProvider = new SidebarProvider(context.extensionUri, context);
 	
-	// Register webview view provider with error handling
+	// Register webview view provider with retainContextWhenHidden to prevent reloads
 	try {
 		context.subscriptions.push(
 			vscode.window.registerWebviewViewProvider(
 				"archyTaskView",
-				sidebarProvider
+				sidebarProvider,
+				{
+					webviewOptions: {
+						retainContextWhenHidden: true
+					}
+				}
 			)
 		);
 	} catch (error) {
